@@ -19,8 +19,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
 builder.Services.AddBigCommerceServices(builder.Configuration.GetSection("BigCommerce"));
 
 var app = builder.Build();

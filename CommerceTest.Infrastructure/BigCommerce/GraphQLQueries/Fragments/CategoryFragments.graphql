@@ -1,0 +1,5 @@
+fragment CategoryTreeFields on CategoryTreeItem {
+    name,
+    path,
+    entityId
+}

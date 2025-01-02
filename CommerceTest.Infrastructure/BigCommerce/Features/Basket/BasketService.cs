@@ -1,5 +1,4 @@
 using System.Text.Json;
-using AutoMapper;
 using BigCommerce.GraphQL;
 using CommerceTest.Application.Interfaces;
 using CommerceTest.Domain.Models;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace CommerceTest.Infrastructure.BigCommerce.Features.Basket;
 
-public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAccessor context, IMapper mapper): IBasketService
+public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAccessor context, IMapper<IPhysicalItemFields, BasketItem> physicalMapper, IMapper<IDigitalItemFields, BasketItem> digitalMapper): IBasketService
 {
     private const string CART_ITEM_WAREHOUSES_MAP_KEY = "CartItemWarehouses";
     
@@ -19,17 +18,13 @@ public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAcc
             throw new Exception("Invalid product Id");
         }
 
-        int? variantId = null;
-        if (request.Options.Count > 0)
+        var optionValues = request.Options.Select(x => new OptionValueId
         {
-            var optionValues = request.Options.Select(x => new OptionValueId
-            {
-                OptionEntityId = int.Parse(x.OptionId),
-                ValueEntityId = int.Parse(x.OptionValue)
-            }).ToList();
-            var variant = await client.GetVariantFromOptions.ExecuteAsync(productId, optionValues, ct);
-            variantId = variant.Data.Site.Product.Variants.Edges.FirstOrDefault().Node.EntityId;
-        }
+            OptionEntityId = int.Parse(x.OptionId),
+            ValueEntityId = int.Parse(x.OptionValue)
+        }).ToList();
+        var variant = await client.GetVariantFromOptions.ExecuteAsync(productId, optionValues, ct);
+        var variantId = variant.Data.Site.Product.Variants.Edges.FirstOrDefault().Node.EntityId;
         
         if (context.HttpContext.Request.Cookies.TryGetValue("BasketId", out var basketId) && !string.IsNullOrWhiteSpace(basketId))
         {
@@ -68,9 +63,8 @@ public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAcc
 
         var items = new List<BasketItem>();
         
-        items.AddRange(cart.LineItems.CustomItems.Select(mapper.Map<BasketItem>));
-        items.AddRange(cart.LineItems.DigitalItems.Select(mapper.Map<BasketItem>));
-        items.AddRange(cart.LineItems.PhysicalItems.Select(mapper.Map<BasketItem>));
+        items.AddRange(cart.LineItems.PhysicalItems.Select(physicalMapper.Map));
+        items.AddRange(cart.LineItems.DigitalItems.Select(digitalMapper.Map));
         
         viewModel.Items = items;
 
