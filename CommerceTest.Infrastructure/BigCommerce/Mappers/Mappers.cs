@@ -8,6 +8,10 @@ public class BigCommerceMapProfile : Profile
 {
     public BigCommerceMapProfile()
     {
+        CreateMap<IProductById_Site_Product_ReviewSummary, ProductRatingSummary>()
+            .ForMember(dest => dest.Average, opt => opt.MapFrom(src => src.SummationOfRatings))
+            .ForMember(dest => dest.Count, opt => opt.MapFrom(src => src.NumberOfReviews));
+        
         CreateMap<IProductFields, Product>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.EntityId))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
@@ -16,7 +20,11 @@ public class BigCommerceMapProfile : Profile
             .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images.Edges.Select(x => x.Node.Url960wide)))
             .ForMember(dest => dest.Brand, opt => opt.MapFrom(src => src.Brand.Name))
             .ForMember(dest => dest.Options, opt => opt.MapFrom(src => src.ProductOptions.Edges.Select(x => x.Node)))
-            .ForMember(dest => dest.RatingSummary, opt => opt.MapFrom(src => src.ReviewSummary));
+            .ForMember(dest => dest.RatingSummary, opt =>
+            {
+                opt.PreCondition(src => src.ReviewSummary is not null);
+                opt.MapFrom(src => src.ReviewSummary);
+            });
 
         CreateMap<IProductById_Site_Product_ProductOptions_Edges_Node, ProductOption>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName))
@@ -33,10 +41,7 @@ public class BigCommerceMapProfile : Profile
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Label));
         // .ForMember(dest => dest.Hex, opt => opt.MapFrom(src => src.))
 
-        CreateMap<IProductById_Site_Product_ReviewSummary, ProductRatingSummary>()
-            .ForMember(dest => dest.Average, opt => opt.MapFrom(src => src.SummationOfRatings))
-            .ForMember(dest => dest.Count, opt => opt.MapFrom(src => src.NumberOfReviews));
-
+       
         CreateMap<IProductById_Site_Product, Product>()
             .IncludeBase<IProductFields, Product>();
 

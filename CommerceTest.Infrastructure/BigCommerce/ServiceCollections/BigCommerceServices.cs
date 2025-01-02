@@ -2,6 +2,7 @@ using System.Reflection;
 using CommerceTest.Application.Interfaces;
 using CommerceTest.Infrastructure.BigCommerce.Features.Basket;
 using CommerceTest.Infrastructure.BigCommerce.Features.Categories;
+using CommerceTest.Infrastructure.BigCommerce.Mappers;
 using CommerceTest.Infrastructure.BigCommerce.Products;
 using CommerceTest.Infrastructure.BigCommerce.Serializers;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +21,12 @@ public static class BigCommerceServices
         services.AddTransient<IBasketService, BigCommerceBasketService>();
         
         services.AddSerializer<BigDecimalSerializer>();
-        services.AddAutoMapper(Assembly.GetAssembly(typeof(CommerceTest.Infrastructure.BigCommerce.Mappers.BigCommerceMapProfile)));
+        services.AddAutoMapper(config =>
+        {
+            config.AllowNullDestinationValues = true;
+            config.AddProfile(new BigCommerceMapProfile());
+            
+        });
         services
             .AddBigCommerceClient()
             .ConfigureHttpClient(client =>
