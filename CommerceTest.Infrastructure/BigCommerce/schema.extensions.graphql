@@ -1,0 +1,8 @@
+directive @serializationType(name: String!) on SCALAR
+
+"Defines the runtimeType of a scalar"
+directive @runtimeType(name: String!) on SCALAR
+
+extend scalar BigDecimal
+    @serializationType(name: "global::System.Decimal")
+    @runtimeType(name: "global::System.Decimal")

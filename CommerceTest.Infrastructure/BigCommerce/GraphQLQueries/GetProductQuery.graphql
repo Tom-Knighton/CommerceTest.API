@@ -1,0 +1,9 @@
+query productById(
+    $productId: Int!
+) {
+    site {
+        product(entityId: $productId) {
+            ...ProductFields
+        }
+    }
+}

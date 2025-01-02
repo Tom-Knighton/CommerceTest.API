@@ -1,0 +1,24 @@
+{
+  "schema": "schema.graphql",
+  "documents": "**/**.graphql",
+  "extensions": {
+    "strawberryShake": {
+      "name": "BigCommerceClient",
+      "namespace": "BigCommerce.GraphQL",
+      "url": "https://store-qgqyyb2mu6-1688389.mybigcommerce.com/graphql",
+      "dependencyInjection": true,
+      "strictSchemaValidation": true,
+      "emitGeneratedCode": true,
+      "records": {
+        "inputs": false,
+        "entities": false
+      },
+      "transportProfiles": [
+        {
+          "default": "Http",
+          "subscription": "WebSocket"
+        }
+      ]
+    }
+  }
+}

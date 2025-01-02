@@ -1,0 +1,9 @@
+query GetRootCategories {
+    site {
+        categoryTree {
+            name,
+            path,
+            entityId
+        }
+    }
+}

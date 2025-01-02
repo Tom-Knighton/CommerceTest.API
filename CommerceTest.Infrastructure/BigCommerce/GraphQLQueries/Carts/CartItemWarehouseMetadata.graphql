@@ -1,0 +1,48 @@
+mutation AddCartItemWarehouseMap($cartId: String!, $mapJson: String!) {
+    cart {
+      createCartMetafield(input: {
+          cartEntityId: $cartId
+          data: {
+              key: "CartItemWarehouses"
+              value: $mapJson
+          }
+      }) {
+          metafield {
+              entityId
+          }
+      }
+    } 
+}
+
+mutation UpdateCartWarehouseItemWarehouseMap($cartId: String!, $metafieldId: Int!, $mapJson: String!) {
+    cart {
+        updateCartMetafield(input: { 
+            cartEntityId: $cartId
+            metafieldEntityId: $metafieldId
+            data: {
+                key: "CartItemWarehouses"
+                value: $mapJson
+            }
+        }) {
+            metafield {
+                entityId
+            }
+        }
+    }
+}
+
+query GetCartWarehouseMap($cartId: String!) {
+    site {
+        cart(entityId: $cartId) {
+            metafields(namespace: "bc_storefront", keys: ["CartItemWarehouses"]) {
+                edges {
+                    node {
+                        key
+                        value
+                        entityId
+                    }
+                }
+            }
+        }
+    }
+}

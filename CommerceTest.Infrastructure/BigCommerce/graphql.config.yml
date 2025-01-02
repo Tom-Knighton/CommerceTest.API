@@ -1,0 +1,8 @@
+schema: schema.graphql
+extensions:
+  endpoints:
+    production:
+      url: https://store-qgqyyb2mu6-1688389.mybigcommerce.com/graphql
+      headers:
+        Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJjaWQiOlsxNjg4Mzg5XSwiY29ycyI6W10sImVhdCI6MTc2NzExNzM3NCwiaWF0IjoxNzM1NTgxMzgzLCJpc3MiOiJCQyIsInNpZCI6MTAwMzMwMjY0Niwic3ViIjoiajBubHhiMGg1enpydHdnYWl4bGtvZmttdXFzNnkwZyIsInN1Yl90eXBlIjoyLCJ0b2tlbl90eXBlIjoxfQ.4zjf2nzWS8t-AyS8VOTGFzQW3aDUDTU1okzS3I_USfnm9RYUIhC3TqMIwPmj4mP35TewbABzbpoIjrZwyrEEMg
+documents: '**/*.graphql'

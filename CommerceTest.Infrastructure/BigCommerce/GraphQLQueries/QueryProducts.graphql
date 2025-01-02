@@ -1,0 +1,15 @@
+query QueryProducts($query: String!) {
+    site {
+        search {
+            searchProducts(filters: { searchTerm: $query }) {
+                products {
+                    edges {
+                        node {
+                            ...ProductFields
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
