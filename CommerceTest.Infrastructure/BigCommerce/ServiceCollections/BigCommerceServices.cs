@@ -39,7 +39,7 @@ public static class BigCommerceServices
         {
             client.BaseAddress = new Uri("https://api.bigcommerce.com/stores/");
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + configuration["AuthToken"]);
-        });
+        }).AddHttpMessageHandler<BCDelegationHandler>();
 
         return services;
     }
@@ -47,21 +47,36 @@ public static class BigCommerceServices
 
 public class BCDelegationHandler(IHttpContextAccessor httpContextAccessor) : DelegatingHandler
 {
+    private string[] ProxyCookies = ["SHOP_SESSION_TOKEN", "__HOST-SHOP_SESSION_TOKEN", "athena_short_visit_id", "fornax_anonymousId"];
     private void ConfigureCustomHeader(HttpRequestMessage request)
     {
         var customerHeader = httpContextAccessor.HttpContext?.Request.Headers["CustomerId"].FirstOrDefault();
         if (customerHeader is not null)
         {
-            request.Headers.Add("X-Bc-Customer-Access-Token", customerHeader);
+            request.Headers.Add("X-Bc-Customer-Id", customerHeader);
         }
-        
-        
+
+        var reqCookies = httpContextAccessor.HttpContext?.Request.Headers.Cookie;
+        if (!string.IsNullOrWhiteSpace(reqCookies))
+        {
+            request.Headers.Add("Cookie", reqCookies.ToString());
+        }
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         ConfigureCustomHeader(request);
-        return await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken);
+
+        if (response.Headers.TryGetValues("Set-Cookie", out var setCookieHeaders))
+        {
+            foreach (var setCookie in setCookieHeaders)
+            {
+                httpContextAccessor.HttpContext?.Response.Headers.Append("Set-Cookie", setCookie);
+            }
+        }
+        
+        return response;
     }
 
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)

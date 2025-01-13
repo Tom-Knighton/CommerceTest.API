@@ -13,6 +13,10 @@
       <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+      <PackageReference Include="NSwag.MSBuild" Version="14.2.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="StrawberryShake.Server" Version="14.3.0" />
     </ItemGroup>
 

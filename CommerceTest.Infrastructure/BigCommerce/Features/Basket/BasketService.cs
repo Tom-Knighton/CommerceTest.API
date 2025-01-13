@@ -7,9 +7,10 @@ using Microsoft.AspNetCore.Http;
 
 namespace CommerceTest.Infrastructure.BigCommerce.Features.Basket;
 
-public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAccessor context, IMapper<IPhysicalItemFields, BasketItem> physicalMapper, IMapper<IDigitalItemFields, BasketItem> digitalMapper): IBasketService
+public class BigCommerceBasketService(IBigCommerceClient client, IHttpClientFactory factory, IHttpContextAccessor context, IMapper<IPhysicalItemFields, BasketItem> physicalMapper, IMapper<IDigitalItemFields, BasketItem> digitalMapper): IBasketService
 {
     private const string CART_ITEM_WAREHOUSES_MAP_KEY = "CartItemWarehouses";
+    private HttpClient _restClient = factory.CreateClient("BigCommerce");
     
     public async Task<string> AddItemToBasket(AddItemToBasketRequest request, CancellationToken ct = default)
     {
@@ -42,8 +43,8 @@ public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAcc
             var createResponse = await client.CreateBasket.ExecuteAsync(productId, variantId, request.Quantity, ct);
             var cartId = createResponse.Data.Cart.CreateCart.Cart.EntityId;
             var cartMetadataResult = await client.GetCartWarehouseMap.ExecuteAsync(cartId, ct);
-            var metafields = cartMetadataResult.Data.Site.Cart.Metafields.Edges.Select(x => x.Node).ToList();
-            await UpdateWarehouseForCartItem(cartId, metafields, request.Warehouse,
+            var metafields = cartMetadataResult.Data?.Site?.Cart?.Metafields?.Edges?.Select(x => x.Node)?.ToList();
+            await UpdateWarehouseForCartItem(cartId, metafields ?? [], request.Warehouse,
                 request.ProductId, variantId);
             await client.SaveCart.ExecuteAsync(cartId, ct);
             return cartId;
@@ -52,6 +53,7 @@ public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAcc
 
     public async Task<BasketDto> GetBasket(string id, CancellationToken ct = default)
     {
+        // var cart = await 
         var cartResponse = await client.GetBasket.ExecuteAsync(id, ct);
         var cart = cartResponse.Data.Site.Cart;
 
@@ -88,6 +90,12 @@ public class BigCommerceBasketService(IBigCommerceClient client, IHttpContextAcc
         viewModel.SubTotal = viewModel.Items.Sum(i => i.Price * i.Quantity);
 
         return viewModel;
+    }
+
+    public async Task<string> GenerateCheckoutLink(string basketId, CancellationToken ct = default)
+    {
+        var urlResponse = await client.GenerateCheckoutLink.ExecuteAsync(basketId, ct);
+        return urlResponse.Data?.Cart?.CreateCartRedirectUrls?.RedirectUrls?.RedirectedCheckoutUrl ?? "";
     }
 
     private async Task UpdateWarehouseForCartItem(string cartId, ICollection<IGetCartWarehouseMap_Site_Cart_Metafields_Edges_Node> metadata, string warehouse, string productId, int? variantId = null)

@@ -1,0 +1,9 @@
+mutation GenerateCheckoutLink($cartId: String!) {
+    cart {
+        createCartRedirectUrls(input: { cartEntityId: $cartId}) {
+            redirectUrls {
+                redirectedCheckoutUrl
+            }
+        }
+    }
+}

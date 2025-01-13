@@ -1,3 +1,4 @@
+using System.Net;
 using CommerceTest.Application.Interfaces;
 using CommerceTest.Domain.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -22,14 +23,22 @@ public class BasketController(IBasketService basketService): ControllerBase
     [HttpGet("GetBasket")]
     public async Task<IActionResult> GetBasket(CancellationToken ct = default)
     {
-        var id = HttpContext.Request.Cookies["BasketId"];
-        if (string.IsNullOrWhiteSpace(id))
+        try
         {
-            return BadRequest();
+            var id = HttpContext.Request.Cookies["BasketId"];
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest();
+            }
+
+            var basket = await basketService.GetBasket(id, ct);
+
+            return Ok(basket);
         }
-        
-        var basket = await basketService.GetBasket(id, ct);
-        
-        return Ok(basket);
+        catch (Exception ex)
+        {
+            HttpContext.Response.Cookies.Delete("BasketId");
+            return Ok();
+        }
     }
 }

@@ -1,5 +1,7 @@
 using System.Reflection;
 using CommerceTest.Infrastructure.BigCommerce.ServiceCollections;
+using CommerceTestAPI.Mutations;
+using CommerceTestAPI.Queries;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,12 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 }
+
+builder.Services
+    .AddGraphQLServer()
+    .AddMutationType<Mutation>()
+    .AddTypeExtension<BasketMutations>()
+    .AddCommerceAPITypes();
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
@@ -30,6 +38,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.MapGraphQL();
 app.MapControllers();
 app.UseHttpsRedirection();
 
